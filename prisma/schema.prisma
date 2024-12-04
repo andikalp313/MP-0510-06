@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -27,11 +21,11 @@ model User {
   isDeleted        Boolean           @default(false)
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
-  Transaction      Transaction[]
-  Event            Event[]
-  Coupon           Coupon[]
-  Review           Review[]
-  Notification     Notification[]
+  transactions     Transaction[]
+  events           Event[]
+  coupons          Coupon[]
+  reviews          Review[]
+  notifications    Notification[]
   referredBy       ReferralHistory?  @relation("ReferredByRelation")
   referrals        ReferralHistory[] @relation("ReferrerRelation")
 
@@ -49,19 +43,18 @@ model Event {
   user              User            @relation(fields: [userId], references: [id])
   eventCategoriesId Int
   eventCategory     EventCategories @relation(fields: [eventCategoriesId], references: [id])
-
-  title          String
-  description    String
-  price          Int
-  startDate      DateTime
-  endDate        DateTime
-  avaliableSeats Int
-  location       String
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  Transaction    Transaction[]
-  Voucher        Voucher[]
-  Review         Review[]
+  title             String
+  description       String
+  price             Int
+  startDate         DateTime
+  endDate           DateTime
+  avaliableSeats    Int
+  location          String
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  transactions      Transaction[]
+  vouchers          Voucher[]
+  reviews           Review[]
 
   @@map("events")
 }
@@ -72,7 +65,7 @@ model EventCategories {
   description String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  Event       Event[]
+  events      Event[]
 
   @@map("event_categories")
 }
@@ -83,9 +76,9 @@ model Transaction {
   user         User              @relation(fields: [userId], references: [id])
   eventId      Int
   event        Event             @relation(fields: [eventId], references: [id])
-  couponId     Int
+  couponId     Int?
   coupon       Coupon?           @relation(fields: [couponId], references: [id])
-  voucherId    Int
+  voucherId    Int?
   voucher      Voucher?          @relation(fields: [voucherId], references: [id])
   status       TransactionStatus
   paymentProof String
@@ -117,7 +110,7 @@ model Coupon {
   expiresAt     DateTime
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
-  Transaction   Transaction[]
+  transactions  Transaction[]
 
   @@map("coupons")
 }
@@ -132,7 +125,7 @@ model Voucher {
   endDate       DateTime
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
-  Transaction   Transaction[]
+  transactions  Transaction[]
 
   @@map("vouchers")
 }
