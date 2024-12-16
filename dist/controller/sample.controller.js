@@ -1,6 +1,6 @@
+"use strict";
 // import { NextFunction, Request, Response } from "express";
 // //import { getSamplesService } from "../services/sample/get-samples.service";
-
 // export const getSamplesController = async (
 //   req: Request,
 //   res: Response,
