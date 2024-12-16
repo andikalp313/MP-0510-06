@@ -16,22 +16,23 @@ export const registerService = async (body: User) => {
 
     const hashedPassword = await hashPassword(password);
 
-    const referralOwner = await prisma.user.findFirst({
-      where: { referralCode: referredBy },
-    });
+    let referralOwner = null;
 
-    if (!referralOwner) {
-      throw new Error("Invalid referral code");
+    if (referredBy && referredBy.trim()) {
+      referralOwner = await prisma.user.findFirst({
+        where: { referralCode: referredBy },
+      });
+
+      if (!referralOwner) {
+        throw new Error("Invalid referral code");
+      }
     }
-
-    const referredByValue = body.referredBy
-
     const newUser = await prisma.user.create({
       data: {
         name,
         email,
         password: hashedPassword,
-        referredBy: referredByValue,
+        referredBy: referredBy || null,
       },
     });
 
@@ -40,7 +41,7 @@ export const registerService = async (body: User) => {
         data: {
           userId: referralOwner.id,
           name: referralOwner.name,
-          referralCode: referredByValue,
+          referralCode: referredBy,
           referTo: newUser.id,
           referredName: newUser.name,
         },
