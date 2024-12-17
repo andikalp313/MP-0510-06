@@ -9,25 +9,26 @@ datasource db {
 }
 
 model User {
-  id               Int               @id @default(autoincrement())
-  email            String            @unique
-  fullname         String
+  id               Int                @id @default(autoincrement())
+  email            String             @unique
+  name             String
   password         String
-  profilPicture    String
-  referralCode     String
-  points           Int
+  profilPicture    String?
+  referralCode     String?            @unique @default(dbgenerated("upper(substring(md5(random()::text), 1, 8))"))
+  referredBy       String?            @default("")
+  points           Int                @default(0)
   pointsExpiryDate DateTime?
-  role             Role              @default(USER)
-  isDeleted        Boolean           @default(false)
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
+  role             Role               @default(USER)
+  isDeleted        Boolean            @default(false)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
   transactions     Transaction[]
   events           Event[]
   coupons          Coupon[]
   reviews          Review[]
   notifications    Notification[]
-  referredBy       ReferralHistory?  @relation("ReferredByRelation")
-  referrals        ReferralHistory[] @relation("ReferrerRelation")
+  referralsOwned   ReferralTracking[] @relation("ReferralOwner")
+  referralsUsed    ReferralTracking[] @relation("ReferredUser")
 
   @@map("users")
 }
@@ -38,36 +39,27 @@ enum Role {
 }
 
 model Event {
-  id                Int             @id @default(autoincrement())
-  userId            Int
-  user              User            @relation(fields: [userId], references: [id])
-  eventCategoriesId Int
-  eventCategory     EventCategories @relation(fields: [eventCategoriesId], references: [id])
-  title             String
-  description       String
-  price             Int
-  startDate         DateTime
-  endDate           DateTime
-  avaliableSeats    Int
-  location          String
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
-  transactions      Transaction[]
-  vouchers          Voucher[]
-  reviews           Review[]
+  id             Int           @id @default(autoincrement())
+  userId         Int
+  user           User          @relation(fields: [userId], references: [id])
+  eventCategory  String
+  thumbnail      String
+  title          String
+  description    String        @db.Text
+  price          Int
+  content        String        @db.Text
+  startDate      DateTime
+  endDate        DateTime
+  avaliableSeats Int
+  location       String
+  deletedAt      DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  transactions   Transaction[]
+  vouchers       Voucher[]
+  reviews        Review[]
 
   @@map("events")
-}
-
-model EventCategories {
-  id          Int      @id @default(autoincrement())
-  title       String
-  description String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  events      Event[]
-
-  @@map("event_categories")
 }
 
 model Transaction {
@@ -162,13 +154,17 @@ enum NotificationType {
   INFORMATION
 }
 
-model ReferralHistory {
+model ReferralTracking {
   id           Int      @id @default(autoincrement())
-  referredById Int      @unique
-  referredBy   User     @relation("ReferredByRelation", fields: [referredById], references: [id])
-  referrerId   Int
-  referrer     User     @relation("ReferrerRelation", fields: [referrerId], references: [id])
+  userId       Int
+  user         User     @relation("ReferralOwner", fields: [userId], references: [id])
+  referTo      Int
+  referredUser User     @relation("ReferredUser", fields: [referTo], references: [id])
+  name         String
+  referralCode String?
+  referredName String
   createdAt    DateTime @default(now())
+  updateAt     DateTime @updatedAt
 
-  @@map("referral_histories")
+  @@map("referraltrakings")
 }
