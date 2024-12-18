@@ -42,7 +42,7 @@ model Event {
   id             Int           @id @default(autoincrement())
   userId         Int
   user           User          @relation(fields: [userId], references: [id])
-  eventCategory  EventCategory
+  eventCategory  String
   thumbnail      String
   title          String
   description    String        @db.Text
@@ -60,17 +60,6 @@ model Event {
   reviews        Review[]
 
   @@map("events")
-}
-
-enum EventCategory {
-  TECHNOLOGY
-  BUSINESS
-  EDUCATION
-  ENTERTAINMENT
-  SPORTS
-  HEALTH
-  ART
-  OTHER
 }
 
 model Transaction {
@@ -168,12 +157,12 @@ enum NotificationType {
 model ReferralTracking {
   id           Int      @id @default(autoincrement())
   userId       Int
-  name         String
-  referTo      Int
-  referredName String
-  referralCode String?
   user         User     @relation("ReferralOwner", fields: [userId], references: [id])
+  referTo      Int
   referredUser User     @relation("ReferredUser", fields: [referTo], references: [id])
+  name         String
+  referralCode String?
+  referredName String
   createdAt    DateTime @default(now())
   updateAt     DateTime @updatedAt
 
