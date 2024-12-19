@@ -18,7 +18,10 @@ const getEventsService = (query) => __awaiter(void 0, void 0, void 0, function* 
             deletedAt: null,
         };
         if (search) {
-            whereClause.OR = [{ title: { contains: search, mode: "insensitive" } }];
+            whereClause.OR = [
+                { title: { contains: search, mode: "insensitive" } },
+                { eventCategory: { contains: search, mode: "insensitive" } },
+            ];
         }
         const events = yield prisma_1.prisma.event.findMany({
             where: whereClause,
