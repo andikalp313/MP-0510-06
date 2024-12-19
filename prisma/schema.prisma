@@ -3,9 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  // directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -18,7 +18,7 @@ model User {
   referredBy       String?            @default("")
   points           Int                @default(0)
   pointsExpiryDate DateTime?
-  role             Role               @default(USER)
+  role             Role
   isDeleted        Boolean            @default(false)
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
@@ -157,12 +157,12 @@ enum NotificationType {
 model ReferralTracking {
   id           Int      @id @default(autoincrement())
   userId       Int
-  user         User     @relation("ReferralOwner", fields: [userId], references: [id])
-  referTo      Int
-  referredUser User     @relation("ReferredUser", fields: [referTo], references: [id])
   name         String
   referralCode String?
+  referTo      Int
   referredName String
+  user         User     @relation("ReferralOwner", fields: [userId], references: [id])
+  referredUser User     @relation("ReferredUser", fields: [referTo], references: [id])
   createdAt    DateTime @default(now())
   updateAt     DateTime @updatedAt
 

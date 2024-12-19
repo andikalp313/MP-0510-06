@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { createEventService } from "../services/Events/create-event.service";
 import { getEventsService } from "../services/Events/get.events.service";
+import { getEventService } from "../services/Events/get.event.service";
 
 export const createEventControll = async (
   req: Request,
@@ -38,8 +39,27 @@ export const getEventsController = async (
       sortBy: (req.query.sortBy as string) || "createdAt",
       sortOrder: (req.query.sortOrder as string) || "desc",
       search: (req.query.search as string) || "",
+      location: (req.query.location as string) || "",
+      category: (req.query.category as string) || "",
     };
+
+    console.log(query);
+
     const result = await getEventsService(query);
+    res.status(200).send(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getEventController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const id = Number(req.params.id);
+    const result = await getEventService(id);
     res.status(200).send(result);
   } catch (error) {
     next(error);
