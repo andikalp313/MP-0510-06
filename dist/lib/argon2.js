@@ -9,13 +9,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.comparePaswword = exports.hashPassword = void 0;
+exports.comparePassword = exports.hashPassword = void 0;
 const argon2_1 = require("argon2");
 const hashPassword = (password) => __awaiter(void 0, void 0, void 0, function* () {
     return yield (0, argon2_1.hash)(password);
 });
 exports.hashPassword = hashPassword;
-const comparePaswword = (candidatePassword, hashedPassword) => __awaiter(void 0, void 0, void 0, function* () {
+const comparePassword = (candidatePassword, hashedPassword) => __awaiter(void 0, void 0, void 0, function* () {
     return yield (0, argon2_1.verify)(hashedPassword, candidatePassword);
 });
-exports.comparePaswword = comparePaswword;
+exports.comparePassword = comparePassword;

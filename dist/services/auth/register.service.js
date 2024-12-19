@@ -14,7 +14,7 @@ const prisma_1 = require("../../lib/prisma");
 const argon2_1 = require("../../lib/argon2");
 const registerService = (body) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { name, email, password, referredBy } = body;
+        const { name, email, role, password, referredBy } = body;
         const existingUser = yield prisma_1.prisma.user.findFirst({
             where: { email },
         });
@@ -35,6 +35,7 @@ const registerService = (body) => __awaiter(void 0, void 0, void 0, function* ()
             data: {
                 name,
                 email,
+                role,
                 password: hashedPassword,
                 referredBy: referredBy || null,
             },
