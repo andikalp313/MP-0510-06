@@ -4,7 +4,7 @@ import { hashPassword } from "../../lib/argon2";
 
 export const registerService = async (body: User) => {
   try {
-    const { name, email, password, referredBy } = body;
+    const { name, email,role, password, referredBy } = body;
 
     const existingUser = await prisma.user.findFirst({
       where: { email },
@@ -31,6 +31,7 @@ export const registerService = async (body: User) => {
       data: {
         name,
         email,
+        role,
         password: hashedPassword,
         referredBy: referredBy || null,
       },
