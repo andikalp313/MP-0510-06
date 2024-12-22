@@ -2,7 +2,7 @@ import { Router } from "express";
 import { uploader } from "../lib/multer";
 import { validateCreateEvent } from "../validators/event.validator";
 import {
-  createEventControll,
+  createEventController,
   getEventController,
   getEventsController,
 } from "../controller/event.controller";
@@ -17,9 +17,9 @@ router.post(
   "/",
   // verifyToken,
   uploader().fields([{ name: "thumbnail", maxCount: 1 }]),
-  // fileFilter,
-  // validateCreateEvent,
-  createEventControll
+  fileFilter,
+  validateCreateEvent,
+  createEventController
 );
 
 export default router;

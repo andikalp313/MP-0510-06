@@ -3,6 +3,7 @@ import { PORT } from "./config";
 import cors from "cors";
 import eventRouter from "./routes/event.router";
 import authRouter from "./routes/auth.router";
+import voucherRouter from "./routes/voucher.router";
 
 const app = express();
 
@@ -12,9 +13,14 @@ app.use(express.json());
 //routes
 app.use("/events", eventRouter);
 app.use("/auth", authRouter);
+app.use("/vouchers", voucherRouter);
 //middleware
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-  res.status(400).send(err.message);
+  if (res.headersSent) {
+    return next(err);
+  }
+  res.status(500);
+  res.json({ error: err.message });
 });
 
 app.listen(PORT, () => {

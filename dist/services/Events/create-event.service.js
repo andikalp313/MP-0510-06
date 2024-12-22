@@ -18,7 +18,7 @@ const createEventService = (body, thumbnail, userId) => __awaiter(void 0, void 0
         if (!body.title || !thumbnail) {
             throw new Error("Title and thumbnail are required");
         }
-        // Periksa apakah event dengan judul yang sama sudah ada
+        // Periksa apakah event  n  dengan judul yang sama sudah ada
         const existingEvent = yield prisma_1.prisma.event.findFirst({
             where: { title: body.title },
         });

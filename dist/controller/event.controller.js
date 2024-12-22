@@ -9,36 +9,34 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getEventsController = exports.createEventControll = void 0;
-const create_event_service_1 = require("../services/Events/create-event.service");
-const get_events_service_1 = require("../services/Events/get.events.service");
-const createEventControll = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+exports.getEventController = exports.getEventsController = exports.createEventController = void 0;
+const create_event_service_1 = require("../services/events/create-event.service");
+const get_events_service_1 = require("../services/events/get.events.service");
+const get_event_service_1 = require("../services/events/get.event.service");
+const createEventController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
-        const userId = 1; // ID user default untuk pengujian
-        const thumbnail = (_a = req.files.thumbnail) === null || _a === void 0 ? void 0 : _a[0]; // Pastikan thumbnail diakses dengan benar
-        if (!thumbnail) {
-            res.status(400).json({ message: "Thumbnail is required" });
-            return;
-        }
-        const result = yield (0, create_event_service_1.createEventService)(req.body, thumbnail, userId);
-        res.status(201).json(result);
+        const files = req.files;
+        const result = yield (0, create_event_service_1.createEventService)(req.body, (_a = files.thumbnail) === null || _a === void 0 ? void 0 : _a[0], res.locals.user.id);
+        res.status(200).send(result);
     }
     catch (error) {
-        console.error("Error creating event:", error);
-        next(error); // Gunakan middleware error handling untuk response error
+        next(error);
     }
 });
-exports.createEventControll = createEventControll;
+exports.createEventController = createEventController;
 const getEventsController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const query = {
-            take: parseInt(req.query.take) || 3,
+            take: parseInt(req.query.take) || 8,
             page: parseInt(req.query.page) || 1,
             sortBy: req.query.sortBy || "createdAt",
             sortOrder: req.query.sortOrder || "desc",
             search: req.query.search || "",
+            location: req.query.location || "",
+            category: req.query.category || "",
         };
+        // console.log(query);
         const result = yield (0, get_events_service_1.getEventsService)(query);
         res.status(200).send(result);
     }
@@ -47,3 +45,14 @@ const getEventsController = (req, res, next) => __awaiter(void 0, void 0, void 0
     }
 });
 exports.getEventsController = getEventsController;
+const getEventController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const id = Number(req.params.id);
+        const result = yield (0, get_event_service_1.getEventService)(id);
+        res.status(200).send(result);
+    }
+    catch (error) {
+        next(error);
+    }
+});
+exports.getEventController = getEventController;

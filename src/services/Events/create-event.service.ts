@@ -24,7 +24,7 @@ export const createEventService = async (
       throw new Error("Title and thumbnail are required");
     }
 
-    // Periksa apakah event dengan judul yang sama sudah ada
+    // Periksa apakah event  n  dengan judul yang sama sudah ada
     const existingEvent = await prisma.event.findFirst({
       where: { title: body.title },
     });

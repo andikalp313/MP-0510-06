@@ -13,7 +13,7 @@ exports.getEventsService = void 0;
 const prisma_1 = require("../../lib/prisma");
 const getEventsService = (query) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { page, sortBy, sortOrder, take, search } = query;
+        const { page, sortBy, sortOrder, take, search, category, location } = query;
         const whereClause = {
             deletedAt: null,
         };
@@ -21,7 +21,14 @@ const getEventsService = (query) => __awaiter(void 0, void 0, void 0, function* 
             whereClause.OR = [
                 { title: { contains: search, mode: "insensitive" } },
                 { eventCategory: { contains: search, mode: "insensitive" } },
+                { location: { contains: search, mode: "insensitive" } },
             ];
+        }
+        if (category) {
+            whereClause.eventCategory = category;
+        }
+        if (location) {
+            whereClause.location = { contains: location, mode: "insensitive" };
         }
         const events = yield prisma_1.prisma.event.findMany({
             where: whereClause,
