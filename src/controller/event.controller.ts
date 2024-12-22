@@ -1,32 +1,26 @@
 import { NextFunction, Request, Response } from "express";
-import { createEventService } from "../services/Events/create-event.service";
-import { getEventsService } from "../services/Events/get.events.service";
-import { getEventService } from "../services/Events/get.event.service";
+import { createEventService } from "../services/events/create-event.service";
+import { getEventsService } from "../services/events/get.events.service";
+import { getEventService } from "../services/events/get.event.service";
 
-export const createEventControll = async (
+export const createEventController = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const userId = 1; // ID user default untuk pengujian
-    const thumbnail = (
-      req.files as unknown as { thumbnail: Express.Multer.File[] }
-    ).thumbnail?.[0]; // Pastikan thumbnail diakses dengan benar
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+    const result = await createEventService(
+      req.body,
+      files.thumbnail?.[0],
+      res.locals.user.id
+    );
 
-    if (!thumbnail) {
-      res.status(400).json({ message: "Thumbnail is required" });
-      return;
-    }
-
-    const result = await createEventService(req.body, thumbnail, userId);
-    res.status(201).json(result);
+    res.status(200).send(result);
   } catch (error) {
-    console.error("Error creating event:", error);
-    next(error); // Gunakan middleware error handling untuk response error
+    next(error);
   }
 };
-
 export const getEventsController = async (
   req: Request,
   res: Response,
@@ -34,7 +28,7 @@ export const getEventsController = async (
 ) => {
   try {
     const query = {
-      take: parseInt(req.query.take as string) || 3,
+      take: parseInt(req.query.take as string) || 8,
       page: parseInt(req.query.page as string) || 1,
       sortBy: (req.query.sortBy as string) || "createdAt",
       sortOrder: (req.query.sortOrder as string) || "desc",
@@ -43,7 +37,7 @@ export const getEventsController = async (
       category: (req.query.category as string) || "",
     };
 
-    console.log(query);
+    // console.log(query);
 
     const result = await getEventsService(query);
     res.status(200).send(result);
