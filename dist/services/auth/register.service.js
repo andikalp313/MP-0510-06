@@ -31,6 +31,8 @@ const registerService = (body) => __awaiter(void 0, void 0, void 0, function* ()
                 throw new Error("Invalid referral code");
             }
         }
+        const pointsExpiryDate = new Date();
+        pointsExpiryDate.setMonth(pointsExpiryDate.getMonth() + 3);
         const newUser = yield prisma_1.prisma.user.create({
             data: {
                 name,
@@ -40,6 +42,24 @@ const registerService = (body) => __awaiter(void 0, void 0, void 0, function* ()
                 referredBy: referredBy || null,
             },
         });
+        if (referralOwner) {
+            const couponExpiresAt = new Date();
+            couponExpiresAt.setMonth(couponExpiresAt.getMonth() + 3);
+            const newCoupon = yield prisma_1.prisma.coupon.create({
+                data: {
+                    discountValue: 10000,
+                    ownerId: newUser.id,
+                    expiresAt: couponExpiresAt,
+                },
+            });
+            yield prisma_1.prisma.user.update({
+                where: { id: newUser.id },
+                data: {
+                    discountValue: newCoupon.discountValue,
+                    couponsExpiryDate: newCoupon.expiresAt,
+                },
+            });
+        }
         if (referralOwner) {
             yield prisma_1.prisma.referralTracking.create({
                 data: {
@@ -54,6 +74,7 @@ const registerService = (body) => __awaiter(void 0, void 0, void 0, function* ()
                 where: { id: referralOwner.id },
                 data: {
                     points: { increment: 10000 },
+                    pointsExpiryDate: pointsExpiryDate,
                 },
             });
         }
