@@ -4,7 +4,7 @@ import { hashPassword } from "../../lib/argon2";
 
 export const registerService = async (body: User) => {
   try {
-    const { name, email,role, password, referredBy } = body;
+    const { name, email, role, password, referredBy } = body;
 
     const existingUser = await prisma.user.findFirst({
       where: { email },
@@ -27,6 +27,10 @@ export const registerService = async (body: User) => {
         throw new Error("Invalid referral code");
       }
     }
+
+    const pointsExpiryDate = new Date();
+    pointsExpiryDate.setMonth(pointsExpiryDate.getMonth() + 3);
+
     const newUser = await prisma.user.create({
       data: {
         name,
@@ -37,6 +41,26 @@ export const registerService = async (body: User) => {
       },
     });
 
+    if (referralOwner) {
+      const couponExpiresAt = new Date();
+      couponExpiresAt.setMonth(couponExpiresAt.getMonth() + 3);
+
+      const newCoupon = await prisma.coupon.create({
+        data: {
+          discountValue: 10000,
+          ownerId: newUser.id,
+          expiresAt: couponExpiresAt,
+        },
+      });
+
+      await prisma.user.update({
+        where: { id: newUser.id },
+        data: {
+          discountValue: newCoupon.discountValue,
+          couponsExpiryDate: newCoupon.expiresAt,
+        },
+      });
+    }
     if (referralOwner) {
       await prisma.referralTracking.create({
         data: {
@@ -52,6 +76,7 @@ export const registerService = async (body: User) => {
         where: { id: referralOwner.id },
         data: {
           points: { increment: 10000 },
+          pointsExpiryDate: pointsExpiryDate,
         },
       });
     }

@@ -10,9 +10,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getEventController = exports.getEventsController = exports.createEventController = void 0;
-const create_event_service_1 = require("../services/events/create-event.service");
-const get_events_service_1 = require("../services/events/get.events.service");
-const get_event_service_1 = require("../services/events/get.event.service");
+const create_event_service_1 = require("../services/Events/create-event.service");
+const get_events_service_1 = require("../services/Events/get.events.service");
+const get_event_service_1 = require("../services/Events/get.event.service");
 const createEventController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {

@@ -13,7 +13,7 @@ export const verifyToken = (
     res.status(401).send({ message: "Authorization failed, token is missing" });
     return;
   }
-  req.path;
+
 
   verify(token, JWT_SECRET!, (err, payload) => {
     if (err) {
@@ -23,10 +23,13 @@ export const verifyToken = (
         res.status(401).send({ message: "Invalid token" });
       }
     }
+
     res.locals.user = payload;
+
     next();
   });
 };
+
 export const verifyTokenReset = (
   req: Request,
   res: Response,
@@ -35,7 +38,9 @@ export const verifyTokenReset = (
   const token = req.headers.authorization?.split(" ")[1];
 
   if (!token) {
-    res.status(401).send({ message: "Authorization failed, token is missing" });
+    res
+      .status(401)
+      .send({ message: "Authentication failed, token is missing" });
     return;
   }
 
@@ -47,7 +52,9 @@ export const verifyTokenReset = (
         res.status(401).send({ message: "Invalid token" });
       }
     }
+
     res.locals.user = payload;
+    
     next();
   });
 };
