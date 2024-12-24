@@ -1,8 +1,9 @@
 import { NextFunction, Request, Response } from "express";
-import { createEventService } from "../services/eventss/create-event.service";
-import { getEventsService } from "../services/eventss/get.events.service";
-import { getEventService } from "../services/eventss/get.event.service";
-import { getEventsByUserService } from "../services/eventss/get-events-by-user.service";
+
+import { createEventService } from "../services/Eventss/create-event.service";
+import { getEventsService } from "../services/Eventss/get.events.service";
+import { getEventService } from "../services/Eventss/get.event.service";
+import { getEventsByUserService } from "../services/Eventss/get-events-by-user.service";
 
 export const createEventController = async (
   req: Request,
