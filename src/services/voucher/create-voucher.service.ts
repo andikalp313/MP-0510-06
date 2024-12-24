@@ -1,39 +1,31 @@
+import { Voucher } from "@prisma/client";
 import { prisma } from "../../lib/prisma";
 
-interface CreateVoucherBody {
-  eventId: number;
-  code: string;
-  discountValue: number;
-  startDate: Date;
-  endDate: Date;
-}
-
-export const createVoucherService = async (body: CreateVoucherBody) => {
+export const createVoucherService = async (body: Voucher, userId: number) => {
   try {
-    // Validasi input sederhana
-    if (
-      !body.eventId ||
-      !body.code ||
-      !body.discountValue ||
-      !body.startDate ||
-      !body.endDate
-    ) {
-      throw new Error("All fields are required");
-    }
-
-    // Buat data voucher baru
-    const voucher = await prisma.voucher.create({
-      data: {
-        eventId: body.eventId,
-        code: body.code,
-        discountValue: body.discountValue,
-        startDate: new Date(body.startDate),
-        endDate: new Date(body.endDate),
+    const existingVoucher = await prisma.voucher.findFirst({
+      where: {
+        voucherCode: body.voucherCode,
       },
     });
 
-    return voucher;
+    if (existingVoucher) {
+      throw new Error("Voucher Code is Already exist");
+    }
+
+    const newData = await prisma.voucher.create({
+      data: {
+        voucherCode: body.voucherCode,
+        qty: body.qty,
+        value: body.value,
+        expDate: new Date(body.expDate),
+        userId: userId,
+        eventId: body.eventId,
+      },
+    });
+
+    return newData;
   } catch (error) {
-    throw new Error("Failed to create voucher");
+    throw error;
   }
 };
