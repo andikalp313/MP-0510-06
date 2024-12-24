@@ -9,28 +9,31 @@ datasource db {
 }
 
 model User {
-  id               Int                @id @default(autoincrement())
-  email            String             @unique
-  name             String
-  password         String
-  profilPicture    String?
-  referralCode     String?            @unique @default(dbgenerated("upper(substring(md5(random()::text), 1, 8))"))
-  referredBy       String?            @default("")
-  points           Int                @default(0)
-  pointsExpiryDate DateTime?
-  role             Role
-  isDeleted        Boolean            @default(false)
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-  transactions     Transaction[]
-  events           Event[]
-  coupons          Coupon[]
-  reviews          Review[]
-  notifications    Notification[]
-  referralsOwned   ReferralTracking[] @relation("ReferralOwner")
-  referralsUsed    ReferralTracking[] @relation("ReferredUser")
-  voucher          Voucher[]
-  usedVouchers     Voucher[]          @relation("UsedVouchers")
+  id                Int                @id @default(autoincrement())
+  email             String             @unique
+  name              String
+  password          String
+  role              Role
+  profilPicture     String?
+  referralCode      String?            @unique @default(dbgenerated("upper(substring(md5(random()::text), 1, 8))"))
+  referredBy        String?            @default("")
+  points            Int                @default(0)
+  pointsIsUsed      Boolean            @default(false)
+  pointsExpiryDate  DateTime?
+  coupons           Coupon[]
+  discountValue     Int?
+  couponsExpiryDate DateTime?
+  isDeleted         Boolean            @default(false)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  transactions      Transaction[]
+  events            Event[]
+  reviews           Review[]
+  notifications     Notification[]
+  referralsOwned    ReferralTracking[] @relation("ReferralOwner")
+  referralsUsed     ReferralTracking[] @relation("ReferredUser")
+  voucher           Voucher[]
+  usedVouchers      Voucher[]          @relation("UsedVouchers")
 
   @@map("users")
 }
@@ -96,10 +99,10 @@ enum TransactionStatus {
 
 model Coupon {
   id            Int           @id @default(autoincrement())
-  userId        Int
-  user          User          @relation(fields: [userId], references: [id])
-  code          String
+  couponCode    String        @unique @default(dbgenerated("upper(substring(md5(random()::text), 1, 6))"))
   discountValue Int
+  ownerId       Int
+  ownerName     User          @relation(fields: [ownerId], references: [id])
   isUsed        Boolean       @default(false)
   expiresAt     DateTime
   createdAt     DateTime      @default(now())
