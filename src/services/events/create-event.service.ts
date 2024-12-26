@@ -4,12 +4,16 @@ import { prisma } from "../../lib/prisma";
 interface CreateEventBody {
   title: string;
   description: string;
-  price: number;
+  priceReguler: number;
+  priceVip: number;
+  priceVvip: number;
   content: string;
   eventCategory: string; // --- Change this line
   startDate: Date;
   endDate: Date;
-  avaliableSeats: number;
+  avaliableSeatsReguler: number;
+  avaliableSeatsVip: number;
+  avaliableSeatsVvip: number;
   location: string;
 }
 
@@ -39,8 +43,12 @@ export const createEventService = async (
     // Parsing tipe data yang sesuai
     const eventData = {
       ...body,
-      price: Number(body.price), // Ubah dari string ke number
-      avaliableSeats: Number(body.avaliableSeats), // Ubah dari string ke number
+      priceReguler: Number(body.priceReguler), // Ubah dari string ke number
+      priceVip: Number(body.priceVip), // Ubah dari string ke number
+      priceVvip: Number(body.priceVvip), // Ubah dari string ke number
+      avaliableSeatsReguler: Number(body.avaliableSeatsReguler), // Ubah dari string ke number
+      avaliableSeatsVip: Number(body.avaliableSeatsVip), // Ubah dari string ke number
+      avaliableSeatsVvip: Number(body.avaliableSeatsVvip), // Ubah dari string ke number
       startDate: new Date(body.startDate), // Ubah dari string ke Date
       endDate: new Date(body.endDate), // Ubah dari string ke Date
       thumbnail: secure_url,
