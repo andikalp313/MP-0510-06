@@ -1,14 +1,9 @@
-// import express from "express";
-// import {
-//   createTransaction,
-//   cancelTransaction,
-//   getTransaction,
-// } from "../controller/transaction.controller";
+import { Router } from "express";
+import { createTransactionController } from "../controller/transaction.controller";
+import { verifyToken } from "../lib/jwt";
 
-// const router = express.Router();
+const router = Router();
 
-// router.post("/", createTransaction);
-// router.patch("/transactions/:transactionId/cancel", cancelTransaction);
-// router.get("/transactions/:transactionId", getTransaction);
+router.post("/create", verifyToken, createTransactionController);
 
-// export default router;
+export default router;
