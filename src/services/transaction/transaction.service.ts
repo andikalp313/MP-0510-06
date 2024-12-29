@@ -3,6 +3,7 @@ import { PrismaClient, TransactionStatus, Prisma } from "@prisma/client";
 const prisma = new PrismaClient();
 
 interface CreateTransactionParams {
+  // userId SEKARANG diisi dari token, bukan body
   userId: number;
   eventId: number;
   qty: number;
@@ -24,16 +25,20 @@ export async function createTransaction({
   ticketType,
 }: CreateTransactionParams) {
   return await prisma.$transaction(async (tx) => {
+    // Validasi eventId
+    const events = await tx.event.findUnique({
+      where: { id: eventId },
+    });
+    if (!events) {
+      throw new Error("Invalid eventId");
+    }
+
     // Step 1: Validasi poin user
     if (pointsUsed) {
       const user = await tx.user.findUnique({
         where: { id: userId },
       });
-
-      if (!user) {
-        throw new Error("User not found");
-      }
-
+      if (!user) throw new Error("User not found");
       if (user.points < pointsUsed) {
         throw new Error("Insufficient points");
       }
@@ -42,12 +47,9 @@ export async function createTransaction({
     let coupon = null;
     if (couponCode) {
       coupon = await tx.coupon.findFirst({
-        where: { couponCode: couponCode },
+        where: { couponCode },
       });
-
-      if (!coupon) {
-        throw new Error("Invalid couponCode");
-      }
+      if (!coupon) throw new Error("Invalid couponCode");
       if (coupon.isUsed) {
         throw new Error("Coupon has already been used");
       }
@@ -59,14 +61,13 @@ export async function createTransaction({
     if (voucherCode) {
       voucher = await tx.voucher.findFirst({
         where: {
-          voucherCode: voucherCode,
-          expDate: { gte: new Date() }, // Validasi masa berlaku voucher
+          voucherCode,
+          expDate: { gte: new Date() },
         },
         include: {
           user: true,
         },
       });
-
       if (!voucher) {
         throw new Error("Invalid or expired voucherCode");
       }
@@ -83,37 +84,22 @@ export async function createTransaction({
       throw new Error("Invalid eventId");
     }
 
-    // Step 4: Hitung harga tiket berdasarkan jenis tiket dan jumlah
+    // Step 4: Hitung harga tiket
     let ticketPrice = 0;
-    if (ticketType === "REGULER") {
-      ticketPrice = event.priceReguler;
-    } else if (ticketType === "VIP") {
-      ticketPrice = event.priceVip;
-    } else if (ticketType === "VVIP") {
-      ticketPrice = event.priceVvip;
-    }
+    if (ticketType === "REGULER") ticketPrice = event.priceReguler;
+    else if (ticketType === "VIP") ticketPrice = event.priceVip;
+    else if (ticketType === "VVIP") ticketPrice = event.priceVvip;
 
     let totalPrice = ticketPrice * qty;
 
-    // Step 5: Kurangi harga dengan poin yang digunakan
-    if (pointsUsed) {
-      totalPrice -= pointsUsed;
-    }
-
-    // Step 6: Kurangi harga dengan nilai voucher jika ada
-    if (voucher) {
-      totalPrice -= voucher.value;
-    }
-
-    // Step 7: Kurangi harga dengan nilai coupon jika ada
-    if (coupon) {
-      totalPrice -= coupon.discountValue;
-    }
-
-    // Step 8: Pastikan total price tidak negatif
-    if (totalPrice < 0) {
-      totalPrice = 0;
-    }
+    // Step 5: Kurangi harga dengan poin
+    if (pointsUsed) totalPrice -= pointsUsed;
+    // Step 6: Kurangi harga dengan voucher
+    if (voucher) totalPrice -= voucher.value;
+    // Step 7: Kurangi harga dengan coupon
+    if (coupon) totalPrice -= coupon.discountValue;
+    // Step 8: Pastikan tidak minus
+    if (totalPrice < 0) totalPrice = 0;
 
     // Step 9: Buat transaksi
     const transaction = await tx.transaction.create({
@@ -140,13 +126,9 @@ export async function createTransaction({
     } else if (ticketType === "VVIP") {
       updateData = { avaliableSeatsVvip: { decrement: qty } };
     }
+    await tx.event.update({ where: { id: eventId }, data: updateData });
 
-    await tx.event.update({
-      where: { id: eventId },
-      data: updateData,
-    });
-
-    // Step 11: Update poin user jika digunakan
+    // Step 11: Update poin user
     if (pointsUsed) {
       await tx.user.update({
         where: { id: userId },
@@ -154,17 +136,15 @@ export async function createTransaction({
       });
     }
 
-    // Step 12: Tandai voucher sebagai digunakan
+    // Step 12: Update voucher usage
     if (voucher) {
       await tx.voucher.update({
         where: { id: voucher.id },
-        data: {
-          usedQty: { increment: qty },
-        },
+        data: { usedQty: { increment: qty } },
       });
     }
 
-    // Step 13: Tandai coupon sebagai digunakan
+    // Step 13: Update coupon usage
     if (coupon) {
       await tx.coupon.update({
         where: { id: coupon.id },
@@ -172,32 +152,7 @@ export async function createTransaction({
       });
     }
 
-    // Step 14: Atur scheduler untuk membatalkan transaksi jika tidak selesai dalam 2 jam
-    setTimeout(async () => {
-      try {
-        const foundTransaction = await prisma.transaction.findUnique({
-          where: { id: transaction.id },
-        });
-
-        if (
-          foundTransaction &&
-          foundTransaction.status === TransactionStatus.PENDING
-        ) {
-          await prisma.transaction.update({
-            where: { id: foundTransaction.id },
-            data: { status: TransactionStatus.CANCELED },
-          });
-
-          // Kembalikan jumlah kursi jika transaksi dibatalkan
-          await tx.event.update({
-            where: { id: eventId },
-            data: updateData,
-          });
-        }
-      } catch (error) {
-        console.error("Failed to handle transaction cancellation:", error);
-      }
-    }, 2 * 60 * 60 * 1000);
+    // Step 14: (Opsional) Logika pembatalan otomatis setelah 2 jam -> Cron job atau scheduling
 
     return transaction;
   });

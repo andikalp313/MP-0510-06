@@ -28,7 +28,7 @@ const createEventService = (body, thumbnail, userId) => __awaiter(void 0, void 0
         // Upload thumbnail ke Cloudinary
         const { secure_url } = yield (0, cloudinary_1.cloudinaryUpload)(thumbnail);
         // Parsing tipe data yang sesuai
-        const eventData = Object.assign(Object.assign({}, body), { price: Number(body.price), avaliableSeats: Number(body.avaliableSeats), startDate: new Date(body.startDate), endDate: new Date(body.endDate), thumbnail: secure_url, userId });
+        const eventData = Object.assign(Object.assign({}, body), { priceReguler: Number(body.priceReguler), priceVip: Number(body.priceVip), priceVvip: Number(body.priceVvip), avaliableSeatsReguler: Number(body.avaliableSeatsReguler), avaliableSeatsVip: Number(body.avaliableSeatsVip), avaliableSeatsVvip: Number(body.avaliableSeatsVvip), startDate: new Date(body.startDate), endDate: new Date(body.endDate), thumbnail: secure_url, userId });
         // Buat data event baru
         return yield prisma_1.prisma.event.create({
             data: eventData,

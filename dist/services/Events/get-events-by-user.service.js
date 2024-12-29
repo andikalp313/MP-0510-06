@@ -9,32 +9,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createVoucherService = void 0;
+exports.getEventsByUserService = void 0;
 const prisma_1 = require("../../lib/prisma");
-const createVoucherService = (body, userId) => __awaiter(void 0, void 0, void 0, function* () {
+const getEventsByUserService = (userId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const existingVoucher = yield prisma_1.prisma.voucher.findFirst({
-            where: {
-                voucherCode: body.voucherCode,
-            },
+        return yield prisma_1.prisma.event.findMany({
+            where: { userId: userId },
         });
-        if (existingVoucher) {
-            throw new Error("Voucher Code is Already exist");
-        }
-        const newData = yield prisma_1.prisma.voucher.create({
-            data: {
-                voucherCode: body.voucherCode,
-                qty: body.qty,
-                value: body.value,
-                expDate: new Date(body.expDate),
-                userId: userId,
-                eventId: body.eventId,
-            },
-        });
-        return newData;
     }
     catch (error) {
         throw error;
     }
 });
-exports.createVoucherService = createVoucherService;
+exports.getEventsByUserService = getEventsByUserService;

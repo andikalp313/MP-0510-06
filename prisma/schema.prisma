@@ -99,6 +99,7 @@ enum TransactionStatus {
   FAILED
   CANCELED
   REFUNDED
+  AWAITING_APPROVAL
 }
 
 model Coupon {

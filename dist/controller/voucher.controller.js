@@ -11,9 +11,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createVoucherController = void 0;
 const create_voucher_service_1 = require("../services/voucher/create-voucher.service");
+// import { Role } from "../../prisma/generated/client";
 const createVoucherController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const result = yield (0, create_voucher_service_1.createVoucherService)(req.body);
+        const userId = res.locals.user.id;
+        const result = yield (0, create_voucher_service_1.createVoucherService)(req.body, userId);
         res.status(201).send(result);
     }
     catch (error) {
@@ -21,3 +23,16 @@ const createVoucherController = (req, res, next) => __awaiter(void 0, void 0, vo
     }
 });
 exports.createVoucherController = createVoucherController;
+// export const getVouchersController = async (
+//   req: Request,
+//   res: Response,
+//   next: NextFunction
+// ) => {
+//   try {
+//     const userId = res.locals.user.id;
+//     const result = await getVouchersService(userId);
+//     res.status(200).send(result);
+//   } catch (error) {
+//     next(error);
+//   }
+// };
