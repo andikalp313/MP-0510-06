@@ -9,32 +9,26 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createVoucherService = void 0;
+exports.getTransactionService = void 0;
 const prisma_1 = require("../../lib/prisma");
-const createVoucherService = (body, userId) => __awaiter(void 0, void 0, void 0, function* () {
+const getTransactionService = (id) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const existingVoucher = yield prisma_1.prisma.voucher.findFirst({
-            where: {
-                voucherCode: body.voucherCode,
+        const transaction = yield prisma_1.prisma.transaction.findUnique({
+            where: { id },
+            include: {
+                user: { select: { name: true, points: true } },
+                voucher: { select: { voucherCode: true, value: true } },
+                coupon: { select: { couponCode: true, discountValue: true } },
+                event: { select: { title: true } },
             },
         });
-        if (existingVoucher) {
-            throw new Error("Voucher Code is Already exist");
+        if (!transaction) {
+            throw new Error("Invalid transaction id");
         }
-        const newData = yield prisma_1.prisma.voucher.create({
-            data: {
-                voucherCode: body.voucherCode,
-                qty: body.qty,
-                value: body.value,
-                expDate: new Date(body.expDate),
-                userId: userId,
-                eventId: body.eventId,
-            },
-        });
-        return newData;
+        return transaction;
     }
     catch (error) {
         throw error;
     }
 });
-exports.createVoucherService = createVoucherService;
+exports.getTransactionService = getTransactionService;

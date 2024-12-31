@@ -10,3 +10,4 @@ router.post("/login", auth_validator_1.validateLogin, auth_controller_1.loginCon
 router.post("/forgot-password", auth_validator_1.validateForgotPassword, auth_controller_1.forgotPasswordController);
 router.patch("/reset-password", jwt_1.verifyTokenReset, auth_validator_1.validateResetPassword, auth_controller_1.resetPasswordController);
 exports.default = router;
+//
