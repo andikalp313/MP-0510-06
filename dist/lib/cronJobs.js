@@ -27,7 +27,7 @@ node_cron_1.default.schedule("*/10 * * * *", () => __awaiter(void 0, void 0, voi
         // Cari semua transaksi yang:
         //  1) Status = PENDING
         //  2) createdAt <= twoHoursAgo (sudah lewat 2 jam)
-        //  3) paymentProof masih kosong ("" atau null, sesuaikan dengan schema Anda)
+        //  3) paymentProof masih kosong ("" atau null, )
         const transactions = yield prisma.transaction.findMany({
             where: {
                 status: client_1.TransactionStatus.PENDING,

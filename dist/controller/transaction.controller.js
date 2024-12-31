@@ -9,8 +9,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createTransactionController = void 0;
+exports.PaymentProofController = exports.gettransactionController = exports.createTransactionController = void 0;
+const get_transaction_service_1 = require("../services/transaction/get.transaction.service");
 const transaction_service_1 = require("../services/transaction/transaction.service");
+const payment_proof_service_1 = require("../services/transaction/payment-proof.service");
 const createTransactionController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         // Ambil userId dari res.locals.user (diset oleh middleware auth)
@@ -28,10 +30,50 @@ const createTransactionController = (req, res, next) => __awaiter(void 0, void 0
             paymentProof,
             ticketType,
         });
-        res.status(201).json(result);
+        res.status(200).send(result);
     }
     catch (error) {
         next(error);
     }
 });
 exports.createTransactionController = createTransactionController;
+const gettransactionController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const id = Number(req.params.id);
+        const result = yield (0, get_transaction_service_1.getTransactionService)(id);
+        res.status(200).send(result);
+    }
+    catch (error) {
+        next(error);
+    }
+});
+exports.gettransactionController = gettransactionController;
+const PaymentProofController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const proofFile = req.file; // Mendapatkan file bukti pembayaran dari request
+        const transactionId = Number(req.params.id); // Mengambil ID transaksi dari parameter URL
+        // Validasi input
+        if (!transactionId || isNaN(transactionId)) {
+            res.status(400).json({ error: "Invalid transaction ID." });
+            return;
+        }
+        if (!proofFile) {
+            res.status(400).json({ error: "Payment proof is required." });
+            return;
+        }
+        // Memanggil service untuk memperbarui transaksi
+        const updatedTransaction = yield (0, payment_proof_service_1.PaymentProofService)({
+            transactionId,
+            paymentProof: proofFile,
+        });
+        res.status(200).json({
+            message: "Payment proof uploaded successfully.",
+            data: updatedTransaction,
+        });
+    }
+    catch (error) {
+        // Menyerahkan error ke middleware pengelola error
+        next(error);
+    }
+});
+exports.PaymentProofController = PaymentProofController;

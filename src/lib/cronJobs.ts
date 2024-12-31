@@ -16,7 +16,7 @@ cron.schedule("*/10 * * * *", async () => {
     // Cari semua transaksi yang:
     //  1) Status = PENDING
     //  2) createdAt <= twoHoursAgo (sudah lewat 2 jam)
-    //  3) paymentProof masih kosong ("" atau null, sesuaikan dengan schema Anda)
+    //  3) paymentProof masih kosong ("" atau null, )
     const transactions = await prisma.transaction.findMany({
       where: {
         status: TransactionStatus.PENDING,
