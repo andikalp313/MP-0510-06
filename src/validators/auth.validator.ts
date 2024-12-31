@@ -4,6 +4,26 @@ import { body, validationResult } from "express-validator";
 export const validateRegister = [
   body("name").notEmpty().withMessage("Name is required").isString(),
   body("email").notEmpty().withMessage("Email is required").isEmail(),
+  body("address").notEmpty().withMessage("Address is required"),
+  body("password").notEmpty().withMessage("Password is required"),
+
+  (req: Request, res: Response, next: NextFunction) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      res.status(400).send({ message: errors.array()[0].msg });
+      return;
+    }
+
+    next();
+  },
+];
+
+export const validateOrganizerRegister = [
+  body("name").notEmpty().withMessage("Name is required").isString(),
+  body("organizerName").notEmpty().withMessage("name is requred").isString(),
+  body("email").notEmpty().withMessage("Email is required").isEmail(),
+  body("address").notEmpty().withMessage("address is required").isString(),
   body("password").notEmpty().withMessage("Password is required"),
 
   (req: Request, res: Response, next: NextFunction) => {
