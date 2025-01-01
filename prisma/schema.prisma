@@ -12,6 +12,8 @@ model User {
   id                Int                @id @default(autoincrement())
   email             String             @unique
   name              String
+  organizerName     String?
+  address           String?
   password          String
   role              Role
   profilPicture     String?

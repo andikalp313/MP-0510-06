@@ -6,7 +6,7 @@ import authRouter from "./routes/auth.router";
 import voucherRouter from "./routes/voucher.router";
 import transactionRoutes from "./routes/transaction.router";
 // 1. Import cronJobs agar job aktif
-import "../src/lib/cronJobs";
+import "./lib/cronJobs";
 
 const app = express();
 
@@ -18,7 +18,6 @@ app.use("/events", eventRouter);
 app.use("/auth", authRouter);
 app.use("/vouchers", voucherRouter);
 app.use("/transactions", transactionRoutes);
-// Tambahkan ini
 
 //middleware
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {

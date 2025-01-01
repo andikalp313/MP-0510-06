@@ -11,7 +11,7 @@ const auth_router_1 = __importDefault(require("./routes/auth.router"));
 const voucher_router_1 = __importDefault(require("./routes/voucher.router"));
 const transaction_router_1 = __importDefault(require("./routes/transaction.router"));
 // 1. Import cronJobs agar job aktif
-require("../src/lib/cronJobs");
+require("./lib/cronJobs");
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
@@ -20,7 +20,6 @@ app.use("/events", event_router_1.default);
 app.use("/auth", auth_router_1.default);
 app.use("/vouchers", voucher_router_1.default);
 app.use("/transactions", transaction_router_1.default);
-// Tambahkan ini
 //middleware
 app.use((err, req, res, next) => {
     if (res.headersSent) {
