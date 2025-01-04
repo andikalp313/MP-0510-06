@@ -5,8 +5,9 @@ import express from "express";
 // } from "../controllers/";
 import { verifyToken } from "../lib/jwt";
 import { validateCreateVoucher } from "../validators/voucher.validator";
-import { checkUserRole } from "../lib/checkUserRole";
+
 import { createVoucherController } from "../controller/voucher.controller";
+import { checkUserRole } from "../lib/checkUserRole";
 
 const router = express.Router();
 
@@ -14,7 +15,7 @@ const router = express.Router();
 router.post(
   "/",
   verifyToken,
-  //   checkUserRole,
+  checkUserRole,
   validateCreateVoucher,
   createVoucherController
 );

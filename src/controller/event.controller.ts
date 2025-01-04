@@ -1,9 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 
 import { createEventService } from "../services/events/create-event.service";
-import { getEventsService } from "../services/events/get.events.service";
-import { getEventService } from "../services/events/get.event.service";
+import { getEventsService } from "../services/events/get-events.service";
+import { getEventService } from "../services/events/get-event.service";
 import { getEventsByUserService } from "../services/events/get-events-by-user.service";
+import { deleteEventService } from "../services/events/delete-event.service";
 
 export const createEventController = async (
   req: Request,
@@ -81,6 +82,21 @@ export const getEventsByUserController = async (
       return;
     }
 
+    res.status(200).send(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteEventController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const id = Number(req.params.id);
+    const userId = Number(res.locals.user.id);
+    const result = await deleteEventService(id, userId);
     res.status(200).send(result);
   } catch (error) {
     next(error);

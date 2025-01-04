@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PaymentProofController = exports.gettransactionController = exports.createTransactionController = void 0;
-const get_transaction_service_1 = require("../services/transaction/get.transaction.service");
+const get_transaction_service_1 = require("../services/transaction/get-transaction.service");
 const transaction_service_1 = require("../services/transaction/transaction.service");
 const payment_proof_service_1 = require("../services/transaction/payment-proof.service");
 const createTransactionController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {

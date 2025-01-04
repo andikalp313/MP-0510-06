@@ -1,9 +1,7 @@
-
-import { getTransactionService } from "../services/transaction/get.transaction.service";
+import { getTransactionService } from "../services/transaction/get-transaction.service";
 import { Request, Response, NextFunction } from "express";
 import { createTransaction } from "../services/transaction/transaction.service";
 import { PaymentProofService } from "../services/transaction/payment-proof.service";
-
 
 export const createTransactionController = async (
   req: Request,
@@ -24,7 +22,6 @@ export const createTransactionController = async (
       paymentProof,
       ticketType,
     } = req.body;
-
 
     // Panggil service createTransaction dengan userId yang sudah diverifikasi
     const result = await createTransaction({
