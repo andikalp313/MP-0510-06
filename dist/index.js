@@ -13,12 +13,14 @@ const transaction_router_1 = __importDefault(require("./routes/transaction.route
 const review_router_1 = __importDefault(require("./routes/review.router"));
 // 1. Import cronJobs agar job aktif
 require("./lib/cronJobs");
+const account_router_1 = __importDefault(require("./routes/account.router"));
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 //routes
 app.use("/events", event_router_1.default);
 app.use("/auth", auth_router_1.default);
+app.use("/profiles", account_router_1.default);
 app.use("/vouchers", voucher_router_1.default);
 app.use("/transactions", transaction_router_1.default);
 app.use("/reviews", review_router_1.default);
