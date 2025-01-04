@@ -10,6 +10,10 @@ export const getEventService = async (id: number) => {
         user: {
           select: { name: true },
         },
+        vouchers: {
+          select: { voucherCode: true },
+        },
+
         reviews: {
           include: {
             user: {

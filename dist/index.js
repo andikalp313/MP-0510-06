@@ -12,7 +12,7 @@ const voucher_router_1 = __importDefault(require("./routes/voucher.router"));
 const transaction_router_1 = __importDefault(require("./routes/transaction.router"));
 const review_router_1 = __importDefault(require("./routes/review.router"));
 // 1. Import cronJobs agar job aktif
-require("./lib/cronJobs");
+require("./jobs/cronJobs");
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
