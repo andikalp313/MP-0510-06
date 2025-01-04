@@ -7,6 +7,7 @@ import voucherRouter from "./routes/voucher.router";
 import transactionRoutes from "./routes/transaction.router";
 // 1. Import cronJobs agar job aktif
 import "./lib/cronJobs";
+import accountRouter from "./routes/account.router";
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.use(express.json());
 //routes
 app.use("/events", eventRouter);
 app.use("/auth", authRouter);
+app.use("/profiles", accountRouter);
 app.use("/vouchers", voucherRouter);
 app.use("/transactions", transactionRoutes);
 
