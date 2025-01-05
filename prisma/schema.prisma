@@ -73,6 +73,12 @@ model Event {
   @@map("events")
 }
 
+enum TicketType {
+  REGULER
+  VIP
+  VVIP
+}
+
 model Transaction {
   id           Int               @id @default(autoincrement())
   userId       Int
@@ -87,6 +93,7 @@ model Transaction {
   paymentProof String?
   pointsUsed   Int
   totalPrice   Int
+  ticketType   TicketType // Tambahkan field ini
   quantity     Int
   createdAt    DateTime          @default(now())
   updatedAt    DateTime          @updatedAt
