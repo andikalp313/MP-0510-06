@@ -10,7 +10,6 @@ import reviewRouter from "./routes/review.router";
 import "./jobs/cronJobs";
 import accountRouter from "./routes/account.router";
 
-
 const app = express();
 
 app.use(cors());

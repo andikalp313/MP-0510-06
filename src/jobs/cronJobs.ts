@@ -1,125 +1,122 @@
 // src/cronJobs.ts
 
 import cron from "node-cron";
-import { PrismaClient, TransactionStatus } from "@prisma/client";
+import { PrismaClient, TransactionStatus, Prisma } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
 /**
  * Fungsi helper untuk mengembalikan seats, vouchers, coupons, poin pengguna, dll.
+ * Sekarang menerima klien transaksi sebagai parameter.
  */
-async function revertSeats(trx: any) {
+async function revertSeats(tx: Prisma.TransactionClient, trx: any) {
   try {
-    // Mulai transaksi database untuk memastikan konsistensi
-    await prisma.$transaction(async (prisma) => {
-      // 1. Mengembalikan Kursi
-      const event = await prisma.event.findUnique({
+    // 1. Mengembalikan Kursi
+    const event = await tx.event.findUnique({
+      where: { id: trx.eventId },
+    });
+    if (!event) {
+      throw new Error(`Event dengan ID ${trx.eventId} tidak ditemukan.`);
+    }
+
+    const seatFieldMap: Record<string, keyof typeof event> = {
+      REGULER: "avaliableSeatsReguler",
+      VIP: "avaliableSeatsVip",
+      VVIP: "avaliableSeatsVvip",
+    };
+
+    const seatField = seatFieldMap[trx.ticketType];
+    if (seatField) {
+      await tx.event.update({
         where: { id: trx.eventId },
-      });
-      if (!event) {
-        throw new Error(`Event dengan ID ${trx.eventId} tidak ditemukan.`);
-      }
-
-      const seatFieldMap: Record<string, keyof typeof event> = {
-        REGULER: "avaliableSeatsReguler",
-        VIP: "avaliableSeatsVip",
-        VVIP: "avaliableSeatsVvip",
-      };
-
-      const seatField = seatFieldMap[trx.ticketType];
-      if (seatField) {
-        await prisma.event.update({
-          where: { id: trx.eventId },
-          data: {
-            [seatField]: {
-              increment: trx.quantity,
-            },
+        data: {
+          [seatField]: {
+            increment: trx.quantity,
           },
-        });
-        console.log(`Seats reverted for transaction ID ${trx.id}`);
-      } else {
-        console.warn(
-          `Unknown ticket type '${trx.ticketType}' for transaction ID ${trx.id}`
-        );
-      }
+        },
+      });
+      console.log(`Seats reverted for transaction ID ${trx.id}`);
+    } else {
+      console.warn(
+        `Unknown ticket type '${trx.ticketType}' for transaction ID ${trx.id}`
+      );
+    }
 
-      // 2. Mengembalikan Voucher
-      if (trx.voucherId) {
-        const voucher = await prisma.voucher.findUnique({
-          where: { id: trx.voucherId },
-        });
+    // 2. Mengembalikan Voucher
+    if (trx.voucherId) {
+      const voucher = await tx.voucher.findUnique({
+        where: { id: trx.voucherId },
+      });
 
-        if (voucher) {
-          await prisma.voucher.update({
-            where: { id: voucher.id },
-            data: {
-              usedQty: {
-                decrement: trx.quantity,
-              },
-            },
-          });
-          console.log(
-            `Voucher ID ${voucher.id} reverted for transaction ID ${trx.id}`
-          );
-        } else {
-          console.warn(`Voucher dengan ID ${trx.voucherId} tidak ditemukan.`);
-        }
-      }
-
-      // 3. Mengembalikan Kupon
-      if (trx.couponId) {
-        const coupon = await prisma.coupon.findUnique({
-          where: { id: trx.couponId },
-        });
-
-        if (coupon) {
-          await prisma.coupon.update({
-            where: { id: coupon.id },
-            data: {
-              isUsed: false,
-            },
-          });
-          console.log(
-            `Coupon ID ${coupon.id} reverted for transaction ID ${trx.id}`
-          );
-        } else {
-          console.warn(`Coupon dengan ID ${trx.couponId} tidak ditemukan.`);
-        }
-      }
-
-      // 4. Mengembalikan Poin Pengguna
-      if (trx.pointsUsed && trx.pointsUsed > 0) {
-        await prisma.user.update({
-          where: { id: trx.userId },
+      if (voucher) {
+        await tx.voucher.update({
+          where: { id: voucher.id },
           data: {
-            points: {
-              increment: trx.pointsUsed,
+            usedQty: {
+              decrement: trx.quantity,
             },
-            pointsIsUsed: false, // Sesuaikan dengan logika bisnis Anda
-            pointsExpiryDate: null, // Sesuaikan dengan logika bisnis Anda
           },
         });
         console.log(
-          `Points reverted for user ID ${trx.userId} in transaction ID ${trx.id}`
+          `Voucher ID ${voucher.id} reverted for transaction ID ${trx.id}`
         );
+      } else {
+        console.warn(`Voucher dengan ID ${trx.voucherId} tidak ditemukan.`);
       }
+    }
 
-      // Anda dapat menambahkan logika tambahan sesuai kebutuhan bisnis Anda
-    });
+    // 3. Mengembalikan Kupon
+    if (trx.couponId) {
+      const coupon = await tx.coupon.findUnique({
+        where: { id: trx.couponId },
+      });
+
+      if (coupon) {
+        await tx.coupon.update({
+          where: { id: coupon.id },
+          data: {
+            isUsed: false,
+          },
+        });
+        console.log(
+          `Coupon ID ${coupon.id} reverted for transaction ID ${trx.id}`
+        );
+      } else {
+        console.warn(`Coupon dengan ID ${trx.couponId} tidak ditemukan.`);
+      }
+    }
+
+    // 4. Mengembalikan Poin Pengguna
+    if (trx.pointsUsed && trx.pointsUsed > 0) {
+      await tx.user.update({
+        where: { id: trx.userId },
+        data: {
+          points: {
+            increment: trx.pointsUsed,
+          },
+          // Sesuaikan dengan logika bisnis Anda jika diperlukan
+          // pointsIsUsed: false,
+          // pointsExpiryDate: null,
+        },
+      });
+      console.log(
+        `Points reverted for user ID ${trx.userId} in transaction ID ${trx.id}`
+      );
+    }
+
+    // Anda dapat menambahkan logika tambahan sesuai kebutuhan bisnis Anda
   } catch (error) {
     console.error("Failed to revert seats and related data:", error);
+    throw error; // Pastikan error dilempar agar transaksi dibatalkan
   }
 }
 
-/**
- * Job 1: Cancel transaction after 2 hours if paymentProof is still empty or status is PENDING
- * Runs every 10 minutes.
- * Format cron: '*/
-cron.schedule("*/10 * * * *", async () => {
+cron.schedule("*/15 * * * * *", async () => {
   console.log("Running 2-hours check for pending transactions...");
   try {
     const now = new Date();
     const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000);
+    // const twoHoursAgo = new Date(now.getTime() - 1 * 60 * 1000); untuk mengecek saja
 
     // Cari semua transaksi yang:
     //  1) Status = PENDING
@@ -134,9 +131,9 @@ cron.schedule("*/10 * * * *", async () => {
     });
 
     for (const trx of transactions) {
-      await prisma.$transaction(async (prisma) => {
+      await prisma.$transaction(async (tx) => {
         // Ubah status jadi CANCELED
-        await prisma.transaction.update({
+        await tx.transaction.update({
           where: { id: trx.id },
           data: {
             status: TransactionStatus.CANCELED,
@@ -144,7 +141,7 @@ cron.schedule("*/10 * * * *", async () => {
         });
 
         // Kembalikan seat, dsb.
-        await revertSeats(trx);
+        await revertSeats(tx, trx);
         console.log(
           `Transaction ID ${trx.id} canceled due to 2 hours timeout.`
         );
@@ -160,11 +157,13 @@ cron.schedule("*/10 * * * *", async () => {
  * Runs every day at 00:00.
  * Format cron: '0 0 * * *'
  */
+// cron.schedule("*/15 * * * * **", async () => { untuk cek saja
 cron.schedule("0 0 * * *", async () => {
   console.log("Running 3-days check for awaiting-approval transactions...");
   try {
     const now = new Date();
     const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000);
+    // const threeDaysAgo = new Date(now.getTime() - 1 * 60 * 1000); untuk cek saja
 
     // Cari transaksi yang sudah lewat 3 hari
     // dan statusnya AWAITING_APPROVAL atau PENDING
@@ -178,8 +177,9 @@ cron.schedule("0 0 * * *", async () => {
     });
 
     for (const trx of transactions) {
-      await prisma.$transaction(async (prisma) => {
-        await prisma.transaction.update({
+      await prisma.$transaction(async (tx) => {
+        // Ubah status jadi CANCELED
+        await tx.transaction.update({
           where: { id: trx.id },
           data: {
             status: TransactionStatus.CANCELED,
@@ -187,7 +187,7 @@ cron.schedule("0 0 * * *", async () => {
         });
 
         // Kembalikan seat, dsb.
-        await revertSeats(trx);
+        await revertSeats(tx, trx);
         console.log(
           `Transaction ID ${trx.id} canceled due to 3 days no organizer action.`
         );
@@ -202,9 +202,5 @@ cron.schedule("0 0 * * *", async () => {
  * Fungsi tambahan atau konfigurasi lainnya dapat ditambahkan di sini.
  */
 
-// Eksekusi fungsi secara langsung jika diperlukan (misalnya untuk testing)
-// (async () => {
-//   await revertSeats({ /* Mock transaction object */ });
-// })();
-
+// Ekspor cron jobs agar bisa diinisialisasi dari tempat lain
 export default cron;
