@@ -115,8 +115,8 @@ cron.schedule("*/15 * * * * *", async () => {
   console.log("Running 2-hours check for pending transactions...");
   try {
     const now = new Date();
-    // const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000);
-    const twoHoursAgo = new Date(now.getTime() - 1 * 60 * 1000);
+    const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000);
+    // const twoHoursAgo = new Date(now.getTime() - 1 * 60 * 1000); untuk mengecek saja
 
     // Cari semua transaksi yang:
     //  1) Status = PENDING
@@ -157,11 +157,13 @@ cron.schedule("*/15 * * * * *", async () => {
  * Runs every day at 00:00.
  * Format cron: '0 0 * * *'
  */
+// cron.schedule("*/15 * * * * **", async () => { untuk cek saja
 cron.schedule("0 0 * * *", async () => {
   console.log("Running 3-days check for awaiting-approval transactions...");
   try {
     const now = new Date();
     const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000);
+    // const threeDaysAgo = new Date(now.getTime() - 1 * 60 * 1000); untuk cek saja
 
     // Cari transaksi yang sudah lewat 3 hari
     // dan statusnya AWAITING_APPROVAL atau PENDING

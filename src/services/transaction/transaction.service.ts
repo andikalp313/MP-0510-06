@@ -3,7 +3,7 @@ import { PrismaClient, TransactionStatus, Prisma } from "@prisma/client";
 const prisma = new PrismaClient();
 
 interface CreateTransactionParams {
-  // userId SEKARANG diisi dari token, bukan body
+  // userId diambil dari token, bukan dari body
   userId: number;
   eventId: number;
   qty: number;
@@ -25,11 +25,11 @@ export async function createTransaction({
   ticketType,
 }: CreateTransactionParams) {
   return await prisma.$transaction(async (tx) => {
-    // Validasi eventId
-    const events = await tx.event.findUnique({
+    // Validasi eventId dan ambil detail event
+    const event = await tx.event.findUnique({
       where: { id: eventId },
     });
-    if (!events) {
+    if (!event) {
       throw new Error("Invalid eventId");
     }
 
@@ -43,7 +43,8 @@ export async function createTransaction({
         throw new Error("Insufficient points");
       }
     }
-    // Step 1: Validasi couponCode
+
+    // Step 2: Validasi couponCode
     let coupon = null;
     if (couponCode) {
       coupon = await tx.coupon.findFirst({
@@ -55,7 +56,7 @@ export async function createTransaction({
       }
     }
 
-    // Step 2: Validasi voucherCode
+    // Step 3: Validasi voucherCode
     let voucher: Prisma.VoucherGetPayload<{ include: { user: true } }> | null =
       null;
     if (voucherCode) {
@@ -76,15 +77,24 @@ export async function createTransaction({
       }
     }
 
-    // Step 3: Ambil detail event
-    const event = await tx.event.findUnique({
-      where: { id: eventId },
-    });
-    if (!event) {
-      throw new Error("Invalid eventId");
+    // Step 4: Validasi ketersediaan kursi
+    let availableSeatsField: keyof Prisma.EventUpdateInput;
+    if (ticketType === "REGULER") {
+      availableSeatsField = "avaliableSeatsReguler";
+    } else if (ticketType === "VIP") {
+      availableSeatsField = "avaliableSeatsVip";
+    } else if (ticketType === "VVIP") {
+      availableSeatsField = "avaliableSeatsVvip";
+    } else {
+      throw new Error("Invalid ticket type");
     }
 
-    // Step 4: Hitung harga tiket
+    const availableSeats = event[availableSeatsField] as number;
+    if (availableSeats < qty) {
+      throw new Error("Not enough available seats");
+    }
+
+    // Step 5: Hitung harga tiket
     let ticketPrice = 0;
     if (ticketType === "REGULER") ticketPrice = event.priceReguler;
     else if (ticketType === "VIP") ticketPrice = event.priceVip;
@@ -92,16 +102,19 @@ export async function createTransaction({
 
     let totalPrice = ticketPrice * qty;
 
-    // Step 5: Kurangi harga dengan poin
+    // Step 6: Kurangi harga dengan poin
     if (pointsUsed) totalPrice -= pointsUsed;
-    // Step 6: Kurangi harga dengan voucher
+
+    // Step 7: Kurangi harga dengan voucher
     if (voucher) totalPrice -= voucher.value;
-    // Step 7: Kurangi harga dengan coupon
+
+    // Step 8: Kurangi harga dengan coupon
     if (coupon) totalPrice -= coupon.discountValue;
-    // Step 8: Pastikan tidak minus
+
+    // Step 9: Pastikan totalPrice tidak negatif
     if (totalPrice < 0) totalPrice = 0;
 
-    // Step 9: Buat transaksi
+    // Step 10: Buat transaksi
     const transaction = await tx.transaction.create({
       data: {
         userId,
@@ -114,45 +127,82 @@ export async function createTransaction({
         status: TransactionStatus.PENDING,
         expiresAt: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2 jam
         totalPrice,
+        ticketType,
       },
     });
 
-    // Step 10: Update jumlah kursi event
-    let updateData: Prisma.EventUpdateInput = {};
-    if (ticketType === "REGULER") {
-      updateData = { avaliableSeatsReguler: { decrement: qty } };
-    } else if (ticketType === "VIP") {
-      updateData = { avaliableSeatsVip: { decrement: qty } };
-    } else if (ticketType === "VVIP") {
-      updateData = { avaliableSeatsVvip: { decrement: qty } };
-    }
-    await tx.event.update({ where: { id: eventId }, data: updateData });
+    // Step 11: Update jumlah kursi event dengan validasi
+    const updatedEvent = await tx.event.updateMany({
+      where: {
+        id: eventId,
+        [availableSeatsField]: { gte: qty },
+      },
+      data: {
+        [availableSeatsField]: { decrement: qty },
+      },
+    });
 
-    // Step 11: Update poin user
+    if (updatedEvent.count === 0) {
+      throw new Error(
+        "Failed to update available seats. Possibly not enough seats."
+      );
+    }
+
+    // Step 12: Update poin user
     if (pointsUsed) {
-      await tx.user.update({
-        where: { id: userId },
-        data: { points: { decrement: pointsUsed } },
+      const updatedUser = await tx.user.updateMany({
+        where: {
+          id: userId,
+          points: { gte: pointsUsed },
+        },
+        data: {
+          points: { decrement: pointsUsed },
+        },
       });
+      if (updatedUser.count === 0) {
+        throw new Error(
+          "Failed to update user points. Possibly insufficient points."
+        );
+      }
     }
 
-    // Step 12: Update voucher usage
+    // Step 13: Update voucher usage
     if (voucher) {
-      await tx.voucher.update({
-        where: { id: voucher.id },
-        data: { usedQty: { increment: qty } },
+      const updatedVoucher = await tx.voucher.updateMany({
+        where: {
+          id: voucher.id,
+          qty: { gt: voucher.usedQty },
+        },
+        data: {
+          usedQty: { increment: qty },
+        },
       });
+      if (updatedVoucher.count === 0) {
+        throw new Error(
+          "Failed to update voucher usage. Possibly quota exceeded."
+        );
+      }
     }
 
-    // Step 13: Update coupon usage
+    // Step 14: Update coupon usage
     if (coupon) {
-      await tx.coupon.update({
-        where: { id: coupon.id },
-        data: { isUsed: true },
+      const updatedCoupon = await tx.coupon.updateMany({
+        where: {
+          id: coupon.id,
+          isUsed: false,
+        },
+        data: {
+          isUsed: true,
+        },
       });
+      if (updatedCoupon.count === 0) {
+        throw new Error(
+          "Failed to update coupon usage. Possibly already used."
+        );
+      }
     }
 
-    // Step 14: (Opsional) Logika pembatalan otomatis setelah 2 jam -> Cron job atau scheduling
+    // Step 15: (Opsional) Logika pembatalan otomatis setelah 2 jam -> Cron job atau scheduling
 
     return transaction;
   });
