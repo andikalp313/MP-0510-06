@@ -11,8 +11,7 @@ const express_1 = __importDefault(require("express"));
 const jwt_1 = require("../lib/jwt");
 const voucher_validator_1 = require("../validators/voucher.validator");
 const voucher_controller_1 = require("../controller/voucher.controller");
-const checkUserRole_1 = require("../lib/checkUserRole");
 const router = express_1.default.Router();
 // router.get("/", verifyToken, checkUserRole, getVouchersController); // harus login (verify token) dulu utk get voucher agar user yg tk punya hak tdk bisa lihat voucher code
-router.post("/", jwt_1.verifyToken, checkUserRole_1.checkUserRole, voucher_validator_1.validateCreateVoucher, voucher_controller_1.createVoucherController);
+router.post("/", jwt_1.verifyToken, voucher_validator_1.validateCreateVoucher, voucher_controller_1.createVoucherController);
 exports.default = router;
