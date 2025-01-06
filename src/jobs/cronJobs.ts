@@ -115,13 +115,8 @@ cron.schedule("*/15 * * * * *", async () => {
   console.log("Running 2-hours check for pending transactions...");
   try {
     const now = new Date();
-<<<<<<< HEAD
-    // const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000);
-    const twoHoursAgo = new Date(now.getTime() - 1 * 60 * 1000);
-=======
     const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000);
     // const twoHoursAgo = new Date(now.getTime() - 1 * 60 * 1000); untuk mengecek saja
->>>>>>> dad058190e9e096515025f55d929a55b7f8ca180
 
     // Cari semua transaksi yang:
     //  1) Status = PENDING
@@ -187,7 +182,7 @@ cron.schedule("0 0 * * *", async () => {
         await tx.transaction.update({
           where: { id: trx.id },
           data: {
-            status: TransactionStatus.CANCELED,
+            status: TransactionStatus.REFUNDED,
           },
         });
 
