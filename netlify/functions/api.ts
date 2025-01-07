@@ -14,4 +14,8 @@ app.use("/vouchers", voucherRouter);
 app.use("/transactions", transactionRouter);
 app.use("/reviews", reviewRouter);
 
+app.get("/hello", (req, res) => {
+  res.send("hello");
+});
+
 export const handler = ServerlessHttp(app);
