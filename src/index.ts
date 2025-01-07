@@ -1,15 +1,13 @@
+import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
 import { PORT } from "./config";
-import cors from "cors";
-import eventRouter from "./routes/event.router";
-import authRouter from "./routes/auth.router";
-import voucherRouter from "./routes/voucher.router";
-import transactionRouter from "./routes/transaction.router";
-import reviewRouter from "./routes/review.router";
-import serverless from "serverless-http";
-// 1. Import cronJobs agar job aktif
 import "./jobs/cronJobs";
 import accountRouter from "./routes/account.router";
+import authRouter from "./routes/auth.router";
+import eventRouter from "./routes/event.router";
+import reviewRouter from "./routes/review.router";
+import transactionRouter from "./routes/transaction.router";
+import voucherRouter from "./routes/voucher.router";
 
 const app = express();
 
