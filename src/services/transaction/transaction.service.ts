@@ -1,6 +1,5 @@
 import { PrismaClient, TransactionStatus, Prisma } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import prisma from "../../lib/prisma";
 
 interface CreateTransactionParams {
   // userId diambil dari token, bukan dari body

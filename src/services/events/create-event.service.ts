@@ -1,5 +1,5 @@
 import { cloudinaryUpload } from "../../lib/cloudinary";
-import { prisma } from "../../lib/prisma";
+import prisma from "../../lib/prisma";
 
 interface CreateEventBody {
   title: string;

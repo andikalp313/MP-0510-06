@@ -8,10 +8,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PaymentProofService = void 0;
 const cloudinary_1 = require("../../lib/cloudinary");
-const prisma_1 = require("../../lib/prisma");
+const prisma_1 = __importDefault(require("../../lib/prisma"));
 const PaymentProofService = (_a) => __awaiter(void 0, [_a], void 0, function* ({ transactionId, paymentProof, }) {
     if (!transactionId || !paymentProof) {
         throw new Error("Transaction ID and payment proof are required.");
@@ -23,7 +26,7 @@ const PaymentProofService = (_a) => __awaiter(void 0, [_a], void 0, function* ({
             throw new Error("Failed to upload payment proof to Cloudinary.");
         }
         // Memastikan transaksi dengan ID yang diberikan ada
-        const transaction = yield prisma_1.prisma.transaction.findUnique({
+        const transaction = yield prisma_1.default.transaction.findUnique({
             where: { id: transactionId },
             include: { user: true, event: true }, // Tambahkan relasi jika diperlukan
         });
@@ -35,7 +38,7 @@ const PaymentProofService = (_a) => __awaiter(void 0, [_a], void 0, function* ({
             throw new Error("Only pending transactions can upload payment proof.");
         }
         // Update transaksi dengan URL bukti pembayaran
-        const updatedTransaction = yield prisma_1.prisma.transaction.update({
+        const updatedTransaction = yield prisma_1.default.transaction.update({
             where: { id: transactionId },
             data: {
                 paymentProof: secure_url,

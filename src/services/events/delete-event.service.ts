@@ -1,4 +1,4 @@
-import { prisma } from "../../lib/prisma";
+import prisma from "../../lib/prisma";
 
 export const deleteEventService = async (id: number, userId: number) => {
   try {

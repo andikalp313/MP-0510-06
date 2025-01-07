@@ -8,20 +8,23 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.resetPasswordService = void 0;
 const argon2_1 = require("../../lib/argon2");
-const prisma_1 = require("../../lib/prisma");
+const prisma_1 = __importDefault(require("../../lib/prisma"));
 const resetPasswordService = (userId, password) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const user = yield prisma_1.prisma.user.findFirst({
+        const user = yield prisma_1.default.user.findFirst({
             where: { id: userId },
         });
         if (!user) {
             throw new Error("Acount not found");
         }
         const hashedPassword = yield (0, argon2_1.hashPassword)(password);
-        yield prisma_1.prisma.user.update({
+        yield prisma_1.default.user.update({
             where: { id: userId },
             data: { password: hashedPassword },
         });
