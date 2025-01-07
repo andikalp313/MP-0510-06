@@ -1,37 +1,47 @@
-import { PrismaClient, User } from "@prisma/client";
+import { cloudinaryRemove, cloudinaryUpload } from "../../lib/cloudinary";
 import prisma from "../../lib/prisma";
 
-type UpdateUserPayload = {
-  name?: string;
-  email?: string;
-  address?: string;
-  profilePicture?: string;
-};
+interface UpdateUserBody {
+  name: string;
+  organizerName:string;
+  email:string;
+  address:string;
+  profilePicture: string;
+}
 
-export const updateUser = async (
-  id: number,
-  payload: UpdateUserPayload
-): Promise<User> => {
+export const updateProfileService = async (
+  body: UpdateUserBody,
+  profilePicture: Express.Multer.File | undefined,
+  id: number
+) => {
   try {
-    const user = await prisma.user.findUnique({
+    console.log(body, profilePicture, id);
+
+    const user = await prisma.user.findFirst({
       where: { id },
     });
 
     if (!user) {
-      throw new Error(`User with id ${id} not found`);
+      throw new Error("Invalid user id");
     }
 
-    const updatedUser = await prisma.user.update({
+    let secure_url: string | undefined;
+    if (profilePicture) {
+      if (user.profilPicture !== null) {
+        await cloudinaryRemove(user.profilPicture);
+      }
+
+      const uploadResult = await cloudinaryUpload(profilePicture);
+      secure_url = uploadResult.secure_url;
+    }
+
+    await prisma.user.update({
       where: { id },
-      data: {
-        ...payload,
-      },
+      data: secure_url ? { ...body, profilePicture: secure_url } : body,
     });
 
-    return updatedUser;
+    return { message: "Update profile success" };
   } catch (error) {
-    throw new Error();
-  } finally {
-    await prisma.$disconnect();
+    throw error;
   }
 };

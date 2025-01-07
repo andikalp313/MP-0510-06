@@ -2,6 +2,7 @@ import { getTransactionService } from "../services/transaction/get-transaction.s
 import { Request, Response, NextFunction } from "express";
 import { createTransaction } from "../services/transaction/transaction.service";
 import { PaymentProofService } from "../services/transaction/payment-proof.service";
+import { getTransactionsByUserService } from "../services/transaction/get-transactions-by-user.service";
 
 export const createTransactionController = async (
   req: Request,
@@ -85,6 +86,22 @@ export const PaymentProofController = async (
     });
   } catch (error) {
     // Menyerahkan error ke middleware pengelola error
+    next(error);
+  }
+};
+
+export const getTransactionsByUserController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = res.locals.user.id;
+
+    const result = await getTransactionsByUserService(userId);
+
+    res.status(200).send(result);
+  } catch (error) {
     next(error);
   }
 };

@@ -2,7 +2,7 @@ import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
 import { PORT } from "./config";
 import "./jobs/cronJobs";
-import accountRouter from "./routes/account.router";
+import accountRouter from "./routes/profile.router";
 import authRouter from "./routes/auth.router";
 import eventRouter from "./routes/event.router";
 import reviewRouter from "./routes/review.router";
