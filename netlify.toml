@@ -7,5 +7,5 @@
   status = 200
   to = "/.netlify/functions/api/:splat"
 [build]
-  command = "npx prisma generate && echo 'Building Functions'"
+  command = "echo 'Building Functions'"
   functions = "netlify/functions"
