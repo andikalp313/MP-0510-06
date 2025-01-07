@@ -35,3 +35,4 @@ app.use((err, req, res, next) => {
 app.listen(config_1.PORT, () => {
     console.log(`Server running on port ${config_1.PORT}`);
 });
+exports.default = app;

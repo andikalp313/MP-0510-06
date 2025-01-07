@@ -37,4 +37,4 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-export const handler = serverless(app);
+export default app;
