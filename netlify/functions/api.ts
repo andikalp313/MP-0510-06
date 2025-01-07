@@ -8,7 +8,7 @@ import reviewRouter from "../../src/routes/review.router";
 import accountRouter from "../../src/routes/account.router";
 import { Router } from "express";
 
-app.use("/events", eventRouter);
+app.use("/api/events", eventRouter);
 app.use("/auth", authRouter);
 app.use("/profiles", accountRouter);
 app.use("/vouchers", voucherRouter);
