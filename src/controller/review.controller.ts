@@ -12,7 +12,6 @@ export const createReviewController = async (
     const userId = res.locals.user.id;
     const { eventId, rating, comment } = req.body;
 
-    // Validasi input
     if (!userId || !eventId || !rating || !comment) {
       res.status(400).json({ message: "Semua field diperlukan." });
       return;

@@ -10,7 +10,6 @@ import {
 } from "../controller/event.controller";
 import { verifyToken } from "../lib/jwt";
 import { fileFilter } from "../lib/fileFilter";
-// import { checkUserRole } from "../lib/checkUserRole";
 
 const router = Router();
 

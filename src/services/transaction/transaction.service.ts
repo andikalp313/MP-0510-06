@@ -201,8 +201,6 @@ export async function createTransaction({
       }
     }
 
-    // Step 15: (Opsional) Logika pembatalan otomatis setelah 2 jam -> Cron job atau scheduling
-
     return transaction;
   });
 }

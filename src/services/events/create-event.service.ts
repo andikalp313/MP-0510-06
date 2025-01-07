@@ -8,7 +8,7 @@ interface CreateEventBody {
   priceVip: number;
   priceVvip: number;
   content: string;
-  eventCategory: string; // --- Change this line
+  eventCategory: string;
   startDate: Date;
   endDate: Date;
   avaliableSeatsReguler: number;
@@ -23,7 +23,6 @@ export const createEventService = async (
   userId: number
 ) => {
   try {
-    // Validasi input sederhana
     if (!body.title || !thumbnail) {
       throw new Error("Title and thumbnail are required");
     }
@@ -43,19 +42,17 @@ export const createEventService = async (
     // Parsing tipe data yang sesuai
     const eventData = {
       ...body,
-      priceReguler: Number(body.priceReguler), // Ubah dari string ke number
-      priceVip: Number(body.priceVip), // Ubah dari string ke number
-      priceVvip: Number(body.priceVvip), // Ubah dari string ke number
-      avaliableSeatsReguler: Number(body.avaliableSeatsReguler), // Ubah dari string ke number
-      avaliableSeatsVip: Number(body.avaliableSeatsVip), // Ubah dari string ke number
-      avaliableSeatsVvip: Number(body.avaliableSeatsVvip), // Ubah dari string ke number
-      startDate: new Date(body.startDate), // Ubah dari string ke Date
-      endDate: new Date(body.endDate), // Ubah dari string ke Date
+      priceReguler: Number(body.priceReguler),
+      priceVip: Number(body.priceVip),
+      priceVvip: Number(body.priceVvip),
+      avaliableSeatsReguler: Number(body.avaliableSeatsReguler),
+      avaliableSeatsVip: Number(body.avaliableSeatsVip),
+      avaliableSeatsVvip: Number(body.avaliableSeatsVvip),
+      startDate: new Date(body.startDate),
+      endDate: new Date(body.endDate),
       thumbnail: secure_url,
-      userId, // ID pengguna
+      userId,
     };
-
-    // Buat data event baru
     return await prisma.event.create({
       data: eventData,
     });

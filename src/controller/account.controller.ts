@@ -13,7 +13,6 @@ export const getProfileController = async (
   next: NextFunction
 ) => {
   try {
-    // Mengambil userId dari req.user yang diatur oleh middleware autentikasi
     const userId = res.locals.user.id;
 
     if (!userId) {

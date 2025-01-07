@@ -9,10 +9,7 @@ export const createTransactionController = async (
   next: NextFunction
 ) => {
   try {
-    // Ambil userId dari res.locals.user (diset oleh middleware auth)
     const userIdFromToken = res.locals.user.id;
-
-    // Sementara field lain (eventId, qty, dsb.) tetap diambil dari body
     const {
       eventId,
       qty,
@@ -22,10 +19,8 @@ export const createTransactionController = async (
       paymentProof,
       ticketType,
     } = req.body;
-
-    // Panggil service createTransaction dengan userId yang sudah diverifikasi
     const result = await createTransaction({
-      userId: userIdFromToken, // Ambil dari token, BUKAN dari body
+      userId: userIdFromToken,
       eventId,
       qty,
       pointsUsed,
@@ -62,7 +57,6 @@ export const PaymentProofController = async (
     const proofFile = req.file as Express.Multer.File; // Mendapatkan file bukti pembayaran dari request
     const transactionId = Number(req.params.id); // Mengambil ID transaksi dari parameter URL
 
-    // Validasi input
     if (!transactionId || isNaN(transactionId)) {
       res.status(400).json({ error: "Invalid transaction ID." });
       return;
@@ -72,8 +66,6 @@ export const PaymentProofController = async (
       res.status(400).json({ error: "Payment proof is required." });
       return;
     }
-
-    // Memanggil service untuk memperbarui transaksi
     const updatedTransaction = await PaymentProofService({
       transactionId,
       paymentProof: proofFile,
@@ -84,7 +76,6 @@ export const PaymentProofController = async (
       data: updatedTransaction,
     });
   } catch (error) {
-    // Menyerahkan error ke middleware pengelola error
     next(error);
   }
 };

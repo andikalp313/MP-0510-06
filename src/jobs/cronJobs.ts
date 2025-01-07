@@ -5,10 +5,6 @@ import { PrismaClient, TransactionStatus, Prisma } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-/**
- * Fungsi helper untuk mengembalikan seats, vouchers, coupons, poin pengguna, dll.
- * Sekarang menerima klien transaksi sebagai parameter.
- */
 async function revertSeats(tx: Prisma.TransactionClient, trx: any) {
   try {
     // 1. Mengembalikan Kursi
@@ -94,20 +90,15 @@ async function revertSeats(tx: Prisma.TransactionClient, trx: any) {
           points: {
             increment: trx.pointsUsed,
           },
-          // Sesuaikan dengan logika bisnis Anda jika diperlukan
-          // pointsIsUsed: false,
-          // pointsExpiryDate: null,
         },
       });
       console.log(
         `Points reverted for user ID ${trx.userId} in transaction ID ${trx.id}`
       );
     }
-
-    // Anda dapat menambahkan logika tambahan sesuai kebutuhan bisnis Anda
   } catch (error) {
     console.error("Failed to revert seats and related data:", error);
-    throw error; // Pastikan error dilempar agar transaksi dibatalkan
+    throw error;
   }
 }
 
@@ -152,11 +143,6 @@ cron.schedule("*/15 * * * * *", async () => {
   }
 });
 
-/**
- * Job 2: Cancel transaction after 3 days if status is AWAITING_APPROVAL or PENDING
- * Runs every day at 00:00.
- * Format cron: '0 0 * * *'
- */
 // cron.schedule("*/15 * * * * **", async () => { untuk cek saja
 cron.schedule("0 0 * * *", async () => {
   console.log("Running 3-days check for awaiting-approval transactions...");
@@ -164,7 +150,6 @@ cron.schedule("0 0 * * *", async () => {
     const now = new Date();
     const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000);
     // const threeDaysAgo = new Date(now.getTime() - 1 * 60 * 1000); untuk cek saja
-
     // Cari transaksi yang sudah lewat 3 hari
     // dan statusnya AWAITING_APPROVAL atau PENDING
     const transactions = await prisma.transaction.findMany({
@@ -198,9 +183,4 @@ cron.schedule("0 0 * * *", async () => {
   }
 });
 
-/**
- * Fungsi tambahan atau konfigurasi lainnya dapat ditambahkan di sini.
- */
-
-// Ekspor cron jobs agar bisa diinisialisasi dari tempat lain
 export default cron;
