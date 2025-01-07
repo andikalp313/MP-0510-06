@@ -1,6 +1,6 @@
 // src/services/eventService.ts
 
-import { prisma } from "../../lib/prisma";
+import prisma from "../../lib/prisma";
 
 export const getEventService = async (id: number) => {
   try {

@@ -1,6 +1,5 @@
 import { PrismaClient, User } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import prisma from "../../lib/prisma";
 
 type UpdateUserPayload = {
   name?: string;
@@ -31,7 +30,7 @@ export const updateUser = async (
 
     return updatedUser;
   } catch (error) {
-    throw new Error
+    throw new Error();
   } finally {
     await prisma.$disconnect();
   }

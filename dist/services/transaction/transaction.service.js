@@ -8,13 +8,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createTransaction = createTransaction;
 const client_1 = require("@prisma/client");
-const prisma = new client_1.PrismaClient();
+const prisma_1 = __importDefault(require("../../lib/prisma"));
 function createTransaction(_a) {
     return __awaiter(this, arguments, void 0, function* ({ userId, eventId, qty, pointsUsed, voucherCode, couponCode, paymentProof, ticketType, }) {
-        return yield prisma.$transaction((tx) => __awaiter(this, void 0, void 0, function* () {
+        return yield prisma_1.default.$transaction((tx) => __awaiter(this, void 0, void 0, function* () {
             // Validasi eventId dan ambil detail event
             const event = yield tx.event.findUnique({
                 where: { id: eventId },

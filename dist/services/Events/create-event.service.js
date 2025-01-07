@@ -8,10 +8,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createEventService = void 0;
 const cloudinary_1 = require("../../lib/cloudinary");
-const prisma_1 = require("../../lib/prisma");
+const prisma_1 = __importDefault(require("../../lib/prisma"));
 const createEventService = (body, thumbnail, userId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         // Validasi input sederhana
@@ -19,7 +22,7 @@ const createEventService = (body, thumbnail, userId) => __awaiter(void 0, void 0
             throw new Error("Title and thumbnail are required");
         }
         // Periksa apakah event  n  dengan judul yang sama sudah ada
-        const existingEvent = yield prisma_1.prisma.event.findFirst({
+        const existingEvent = yield prisma_1.default.event.findFirst({
             where: { title: body.title },
         });
         if (existingEvent) {
@@ -30,7 +33,7 @@ const createEventService = (body, thumbnail, userId) => __awaiter(void 0, void 0
         // Parsing tipe data yang sesuai
         const eventData = Object.assign(Object.assign({}, body), { priceReguler: Number(body.priceReguler), priceVip: Number(body.priceVip), priceVvip: Number(body.priceVvip), avaliableSeatsReguler: Number(body.avaliableSeatsReguler), avaliableSeatsVip: Number(body.avaliableSeatsVip), avaliableSeatsVvip: Number(body.avaliableSeatsVvip), startDate: new Date(body.startDate), endDate: new Date(body.endDate), thumbnail: secure_url, userId });
         // Buat data event baru
-        return yield prisma_1.prisma.event.create({
+        return yield prisma_1.default.event.create({
             data: eventData,
         });
     }

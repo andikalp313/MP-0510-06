@@ -1,6 +1,5 @@
 import { PrismaClient, TransactionStatus } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import prisma from "../../lib/prisma";
 
 interface CreateReviewInput {
   userId: number;

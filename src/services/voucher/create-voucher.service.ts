@@ -1,5 +1,5 @@
 import { Voucher } from "@prisma/client";
-import { prisma } from "../../lib/prisma";
+import prisma from "../../lib/prisma";
 
 export const createVoucherService = async (body: Voucher, userId: number) => {
   try {
