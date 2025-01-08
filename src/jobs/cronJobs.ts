@@ -143,13 +143,13 @@ cron.schedule("*/15 * * * * *", async () => {
   }
 });
 
-cron.schedule("*/50 * * * * *", async () => {
+cron.schedule("*/20 * * * * * *", async () => {
   // cron.schedule("0 0 * * *", async () => {
   console.log("Running 3-days check for awaiting-approval transactions...");
   try {
     const now = new Date();
     // const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000);
-    const threeDaysAgo = new Date(now.getTime() - 3 * 60 * 1000);
+    const threeDaysAgo = new Date(now.getTime() - 1 * 60 * 1000);
     // Cari transaksi yang sudah lewat 3 hari
     // dan statusnya AWAITING_APPROVAL atau PENDING
     const transactions = await prisma.transaction.findMany({
